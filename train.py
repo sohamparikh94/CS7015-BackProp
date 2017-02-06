@@ -41,4 +41,13 @@ def parse_args():
 	expt_dir = args.expt_dir
 	mnist_location = args.mnist
 
-parse_args()
+def import_train_data():
+	global train_set, valid_set, test_set
+	train_set, valid_set, test_set = pkl.load(gzip.open(mnist_location, 'rb'), encoding='latin1')
+
+def main():
+	parse_args()
+	import_train_data()
+
+if __name__ == "__main__":
+	main()
