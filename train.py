@@ -1,5 +1,6 @@
 import _pickle as pkl
 import gzip, argparse
+import numpy as np
 
 ''' Parse arguments from the command line. 
 lr specifies the learning rate
@@ -24,7 +25,7 @@ def parse_args():
 	parser.add_argument("--expt_dir")
 	parser.add_argument("--mnist")
 	args = parser.parse_args()
-	global learning_rate, momentum, num_hidden, sizes, activation, loss, opt_algo, batch_size, anneal, save_dir, expt_dir, mnist_location 
+	global learning_rate, momentum, num_hidden, sizes, activation, loss, opt_algo, batch_size, anneal, save_dir, expt_dir, mnist_location
 	learning_rate = args.lr
 	momentum = args.momentum
 	num_hidden = args.num_hidden
@@ -42,12 +43,28 @@ def parse_args():
 	mnist_location = args.mnist
 
 def import_train_data():
-	global train_set, valid_set, test_set
+	global train_set, valid_set, test_set, train_size, valid_size, test_size
 	train_set, valid_set, test_set = pkl.load(gzip.open(mnist_location, 'rb'), encoding='latin1')
+	train_size = len(train_set[0])
+	valid_size = len(valid_set[0])
+	test_set = len(test_set[0])
+
+def get_batch():
+	return train_set[np.random.randint(0,train_size, [batch_size])]
+
+def init_weights():
+	weights = [np.empty([784,sizes[0]])]
+	weights += [np.empty([sizes[i],sizes[i+1]]) for i in range(0,len(sizes) - 1)]
+	weights += [np.empty([sizes[len(sizes) - 1],10])]
+	
 
 def main():
+	np.random.seed(1234)
 	parse_args()
 	import_train_data()
+	init_weights()
+	# train_data()
+
 
 if __name__ == "__main__":
 	main()
