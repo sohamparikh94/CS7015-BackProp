@@ -49,14 +49,40 @@ def import_train_data():
 	valid_size = len(valid_set[0])
 	test_set = len(test_set[0])
 
+
 def get_batch():
-	return train_set[np.random.randint(0,train_size, [batch_size])]
+	train_size = len(train_set[0])
+	indices = np.random.randint(0,train_size, [batch_size])
+	return train_set[0][indices], train_set[1][indices]
 
 def init_weights():
-	weights = [np.empty([784,sizes[0]])]
-	weights += [np.empty([sizes[i],sizes[i+1]]) for i in range(0,len(sizes) - 1)]
-	weights += [np.empty([sizes[len(sizes) - 1],10])]
-	
+	weights = [np.random.randn(784,sizes[0])]
+	weights += [np.random.randn(sizes[i],sizes[i+1]) for i in range(0,num_hidden - 1)]
+	weights += [np.random.randn(sizes[num_hidden - 1], 10)]
+	bias = [np.random.randn(sizes[i]) for i in range(0,num_hidden)]
+	bias += [np.random.randn(10)]
+
+def sigmoid(x):
+	return 1/(1+np.exp(-x))
+
+def softmax(x):
+	return np.exp(x)/np.sum(np.exp(x))
+
+def forward_pass():
+	batch_input, labels = get_batch()
+	batch_output = np.zeros([batch_size, 10])
+	for i in range(batch_size):
+		batch_output[i][labels[i]] = 1
+	current_layer_input = np.copy(batch_input)
+	if activation == "tanh":
+		for i in range(num_hidden + 1):
+			current_layer_output = np.tanh(np.dot(current_layer_input, weights[i]) + bias[i])
+			current_layer_input = np.copy(current_layer_output)
+	else:
+		for i in range(num_hidden + 1):
+			current_layer_output = sigmoid(np.dot(current_layer_input, weights[i]) + bias[i])
+			current_layer_input = np.copy(current_layer_output)
+	label_probabilities = softmax(current_layer_input)
 
 def main():
 	np.random.seed(1234)
